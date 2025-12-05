@@ -30,9 +30,17 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+    //image
+    const image = req.file;
+    let filePath;
+    if (!image) {
+      filePath = "uploads/default.webp";
+    } else {
+      filePath = image.path;
+    }
     await db.query(
-      "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
-      [name, email, hashedPassword, role]
+      "INSERT INTO users (username, email, password, role , image) VALUES (?, ?, ?, ?, ?)",
+      [name, email, hashedPassword, role, filePath]
     );
     return res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
@@ -84,15 +92,24 @@ exports.updateUser = async (req, res) => {
     const { name, email, password, role } = req.body;
     const id = req.params.id;
     const query =
-      "UPDATE users SET username = ? , email = ? , password = ? , role = ? WHERE id = ?";
+      "UPDATE users SET username = ? , email = ? , password = ? , role = ? , image = ? WHERE id = ?";
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    //image
+    const image = req.file;
+    let filePath;
+    if (!image) {
+      filePath = "uploads/default.webp";
+    } else {
+      filePath = image.path;
+    }
     const [result] = await db.query(query, [
       name,
       email,
       hashedPassword,
       role,
       id,
+      filePath,
     ]);
 
     if (result.affectedRows === 0) {
@@ -151,9 +168,7 @@ exports.sendOtp = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-return res.status(200).json({ message: "OTP sent successfully", token });
-
-
+    return res.status(200).json({ message: "OTP sent successfully", token });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

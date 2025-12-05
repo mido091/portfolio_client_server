@@ -1,5 +1,7 @@
 const express = require("express");
 const controller = require("../controller/user.controller");
+const upload = require("../middleware/uploads");
+
 const router = express.Router();
 const {
     verifyToken,
@@ -9,13 +11,13 @@ const {
 //get all users
 router.get("/", verifyToken, verifyAdminOrOwner, controller.getAllUsers);
 //register user
-router.post("/register", controller.registerUser);
+router.post("/register", upload.single("image"), controller.registerUser);
 
 //login user
 router.post("/login", controller.loginUser);
 
 //update user
-router.put("/:id", verifyToken, verifyOwner, controller.updateUser);
+router.put("/:id", upload.single("image"), verifyToken, verifyOwner, controller.updateUser);
 
 //delete user
 router.delete("/:id", verifyToken, verifyOwner, controller.deleteUser);
