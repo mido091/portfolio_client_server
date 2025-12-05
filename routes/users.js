@@ -10,6 +10,9 @@ const {
 } = require("../middleware/auth");
 //get all users
 router.get("/", verifyToken, verifyAdminOrOwner, controller.getAllUsers);
+
+//get user by id
+router.get("/:id", verifyToken, controller.getUserById);
 //register user
 router.post("/register", upload.single("image"), controller.registerUser);
 

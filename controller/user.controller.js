@@ -77,7 +77,6 @@ exports.loginUser = async (req, res) => {
     );
     return res.status(200).json({
       message: "Login successful",
-      id: user.id,
       username: user.username,
       role: user.role,
       token,
@@ -136,7 +135,22 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
+// get user by id
+exports.getUserById = async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [
+      req.params.id,
+    ]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "User retrieved successfully", user: rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 // otp
 exports.sendOtp = async (req, res) => {
   try {
