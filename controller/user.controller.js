@@ -34,7 +34,7 @@ exports.registerUser = async (req, res) => {
     const image = req.file;
     let filePath;
     if (!image) {
-      filePath = "uploads/default.webp";
+      filePath = "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
     } else {
       filePath = image.path;
     }
@@ -99,7 +99,7 @@ exports.updateUser = async (req, res) => {
     const image = req.file;
     let filePath;
     if (!image) {
-      filePath = "uploads/default.webp";
+      filePath = "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
     } else {
       filePath = image.path;
     }
