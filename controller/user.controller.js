@@ -87,39 +87,59 @@ exports.loginUser = async (req, res) => {
 };
 
 //update user
+
 exports.updateUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     const id = req.params.id;
-    const query =
-      "UPDATE users SET username = ? , email = ? , password = ? , role = ? , image = ? WHERE id = ?";
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    //image
+    // جلب بيانات المستخدم القديم
+    const [oldUserRows] = await db.query("SELECT * FROM users WHERE id = ?", [id]);
+    if (oldUserRows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const oldUser = oldUserRows[0];
+
+    // password
+    let hashedPassword;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    } else {
+      hashedPassword = oldUser.password;
+    }
+
+    // image
     const image = req.file;
     let filePath;
     if (!image) {
-      filePath = "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
+      filePath = oldUser.image || "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
     } else {
       filePath = image.path;
     }
+
+    // تحديث المستخدم
+    const query =
+      "UPDATE users SET username = ? , email = ? , password = ? , role = ? , image = ? WHERE id = ?";
     const [result] = await db.query(query, [
-      name,
-      email,
+      name || oldUser.username,
+      email || oldUser.email,
       hashedPassword,
-      role,
-      id,
+      role || oldUser.role,
       filePath,
+      id,
     ]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "User not found" });
     }
+
     return res.status(200).json({ message: "User updated successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 //delete user
 exports.deleteUser = async (req, res) => {
