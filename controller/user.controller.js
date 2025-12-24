@@ -34,7 +34,8 @@ exports.registerUser = async (req, res) => {
     const image = req.file;
     let filePath;
     if (!image) {
-      filePath = "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
+      filePath =
+        "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
     } else {
       filePath = image.path;
     }
@@ -77,7 +78,9 @@ exports.loginUser = async (req, res) => {
     );
     return res.status(200).json({
       message: "Login successful",
+      id: user.id,
       username: user.username,
+      image: user.image,
       role: user.role,
       token,
     });
@@ -94,7 +97,9 @@ exports.updateUser = async (req, res) => {
     const id = req.params.id;
 
     // جلب بيانات المستخدم القديم
-    const [oldUserRows] = await db.query("SELECT * FROM users WHERE id = ?", [id]);
+    const [oldUserRows] = await db.query("SELECT * FROM users WHERE id = ?", [
+      id,
+    ]);
     if (oldUserRows.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -112,7 +117,9 @@ exports.updateUser = async (req, res) => {
     const image = req.file;
     let filePath;
     if (!image) {
-      filePath = oldUser.image || "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
+      filePath =
+        oldUser.image ||
+        "https://res.cloudinary.com/ddqlt5oqu/image/upload/v1764967019/default_pi1ur8.webp";
     } else {
       filePath = image.path;
     }
@@ -133,13 +140,27 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.status(200).json({ message: "User updated successfully" });
+    // Fetch updated user to return to frontend
+    const [updatedRows] = await db.query("SELECT * FROM users WHERE id = ?", [
+      id,
+    ]);
+    const updatedUser = updatedRows[0];
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        image: updatedUser.image,
+        role: updatedUser.role,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
-
 
 //delete user
 exports.deleteUser = async (req, res) => {
