@@ -49,12 +49,14 @@ const corsOptions = {
   },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: false,
   optionsSuccessStatus: 200, // Some legacy browsers choke on 204
 };
 
 // Apply CORS middleware globally
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 
 // Handle preflight OPTIONS requests for ALL routes
 // This middleware intercepts OPTIONS requests before they reach route handlers
