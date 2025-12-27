@@ -55,8 +55,6 @@ const corsOptions = {
 
 // Apply CORS middleware globally
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
 
 // Handle preflight OPTIONS requests for ALL routes
 // This middleware intercepts OPTIONS requests before they reach route handlers
@@ -95,10 +93,15 @@ router.use("/contact", contactRoutes);
 router.use("/settings", settingsRoutes);
 
 // Mount router with /api prefix
-
 app.use("/api", router);
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// Start the server (only for local development)
+// Vercel will use the exported app directly
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
+
+// Export the Express app for Vercel serverless deployment
+module.exports = app;
